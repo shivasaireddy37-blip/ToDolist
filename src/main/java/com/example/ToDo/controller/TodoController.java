@@ -11,11 +11,11 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/todos")
+@RequestMapping("/api")
 public class TodoController {
     private final TodoService todoService;
 
-    @GetMapping("/list")
+    @GetMapping("/getAllTodos")
     public List<TodoResponseDto> getTodos() {
         return todoService.getAllTodos();
     }

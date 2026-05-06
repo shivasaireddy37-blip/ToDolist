@@ -1,5 +1,8 @@
 package com.example.ToDo.entity;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,4 +23,6 @@ public class Todo {
     private String priority;
 
     private String dueDate;
+
+    private LocalDateTime createdAt;
 }

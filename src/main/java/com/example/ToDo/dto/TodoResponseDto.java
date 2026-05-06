@@ -1,5 +1,7 @@
 package com.example.ToDo.dto;
 
+import java.time.LocalDateTime;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,4 +22,7 @@ public class TodoResponseDto {
     private String priority;
 
     private String dueDate;
+
+    private LocalDateTime createdAt;
+    
 }
