@@ -8,9 +8,9 @@ import java.util.List;
 
 public class TodoConstants {
 
-    public static final List<Todo> TODOS = new ArrayList<>();
+    public  List<Todo> TODOS = new ArrayList<>();
 
-    static {
+     {
 
         TODOS.add(
                 new Todo(
@@ -47,8 +47,9 @@ public class TodoConstants {
                         LocalDateTime.of(2026, 5, 6, 9, 15, 15)
                 )
         );
-    }
+}
+    
 
-    private TodoConstants() {
+    public TodoConstants() {
     }
 }
