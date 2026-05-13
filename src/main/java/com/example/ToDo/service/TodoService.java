@@ -1,28 +1,33 @@
 package com.example.ToDo.service;
 
-import com.example.ToDo.constants.TodoConstants;
 import com.example.ToDo.dto.TodoRequestDto;
 import com.example.ToDo.dto.TodoResponseDto;
 import com.example.ToDo.entity.Todo;
+import com.example.ToDo.repository.TodoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 @Service
 public class TodoService {
 
-    private final TodoConstants todoConstants = new TodoConstants();
+    private final TodoRepository todoRepository;
+
+    public TodoService(TodoRepository todoRepository) {
+        this.todoRepository = todoRepository;
+    }
 
     public TodoResponseDto getAllTodos() {
 
         List<TodoResponseDto.TodoData> todoList =
-                todoConstants.TODOS.stream()
+                todoRepository.findAll()
+                        .stream()
                         .map(this::mapToResponse)
                         .collect(Collectors.toList());
 
@@ -34,9 +39,7 @@ public class TodoService {
 
     public TodoResponseDto.TodoData getTodoById(int id) {
 
-        Todo todo = todoConstants.TODOS.stream()
-                .filter(t -> t.getId() == id)
-                .findFirst()
+        Todo todo = todoRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Todo record not found with id: " + id
@@ -45,19 +48,18 @@ public class TodoService {
         return mapToResponse(todo);
     }
 
-    public List<TodoResponseDto.TodoData> getTodoByTitle(String title) {
+    public List<TodoResponseDto.TodoData> getTodoByTitle(
+            String title) {
 
-        String formattedTitle = title
-                .replaceAll("\\s+", "")
-                .trim();
-
-        return todoConstants.TODOS.stream()
+        return todoRepository.findAll()
+                .stream()
                 .filter(todo ->
                         todo.getTitle() != null &&
                                 todo.getTitle()
                                         .replaceAll("\\s+", "")
-                                        .trim()
-                                        .equalsIgnoreCase(formattedTitle))
+                                        .equalsIgnoreCase(
+                                                title.replaceAll("\\s+", "")
+                                        ))
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -65,33 +67,25 @@ public class TodoService {
     public TodoResponseDto.TodoData addTodo(
             TodoRequestDto requestDto) {
 
-        int newId = todoConstants.TODOS.stream()
-                .mapToInt(Todo::getId)
-                .max()
-                .orElse(0) + 1;
+        Todo todo = new Todo();
 
-        Todo todo = new Todo(
-                newId,
-                requestDto.getTitle(),
-                requestDto.getDescription(),
-                requestDto.getStatus(),
-                requestDto.getPriority(),
-                requestDto.getDueDate(),
-                LocalDateTime.now()
+        todo.setTitle(requestDto.getTitle());
+        todo.setDescription(requestDto.getDescription());
+        todo.setStatus(requestDto.getStatus());
+        todo.setPriority(requestDto.getPriority());
+        todo.setDueDate(requestDto.getDueDate());
+        todo.setCreatedAt(LocalDateTime.now());
+
+        return mapToResponse(
+                todoRepository.save(todo)
         );
-
-        todoConstants.TODOS.add(todo);
-
-        return mapToResponse(todo);
     }
 
     public TodoResponseDto.TodoData updateTodo(
             int id,
             TodoRequestDto requestDto) {
 
-        Todo todo = todoConstants.TODOS.stream()
-                .filter(t -> t.getId() == id)
-                .findFirst()
+        Todo todo = todoRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Todo record not found with id: " + id
@@ -103,16 +97,16 @@ public class TodoService {
         todo.setPriority(requestDto.getPriority());
         todo.setDueDate(requestDto.getDueDate());
 
-        return mapToResponse(todo);
+        return mapToResponse(
+                todoRepository.save(todo)
+        );
     }
 
     public TodoResponseDto.TodoData patchTodo(
             int id,
             TodoRequestDto requestDto) {
 
-        Todo todo = todoConstants.TODOS.stream()
-                .filter(t -> t.getId() == id)
-                .findFirst()
+        Todo todo = todoRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Todo record not found with id: " + id
@@ -138,20 +132,20 @@ public class TodoService {
             todo.setDueDate(requestDto.getDueDate());
         }
 
-        return mapToResponse(todo);
+        return mapToResponse(
+                todoRepository.save(todo)
+        );
     }
 
     public Map<String, String> deleteTodo(int id) {
 
-        Todo todo = todoConstants.TODOS.stream()
-                .filter(t -> t.getId() == id)
-                .findFirst()
+        Todo todo = todoRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Todo record not found with id: " + id
                         ));
 
-        todoConstants.TODOS.remove(todo);
+        todoRepository.delete(todo);
 
         Map<String, String> response = new HashMap<>();
 
@@ -163,7 +157,8 @@ public class TodoService {
         return response;
     }
 
-    private TodoResponseDto.TodoData mapToResponse(Todo todo) {
+    private TodoResponseDto.TodoData mapToResponse(
+            Todo todo) {
 
         return new TodoResponseDto.TodoData(
                 todo.getId(),
