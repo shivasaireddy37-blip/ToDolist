@@ -9,9 +9,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,7 +26,7 @@ public class TodoService {
     public TodoResponseDto getAllTodos() {
 
         List<TodoResponseDto.TodoData> todoList =
-                todoRepository.findAll()
+                todoRepository.getAllTodos()
                         .stream()
                         .map(this::mapToResponse)
                         .collect(Collectors.toList());
@@ -39,7 +39,7 @@ public class TodoService {
 
     public TodoResponseDto.TodoData getTodoById(int id) {
 
-        Todo todo = todoRepository.findById(id)
+        Todo todo = todoRepository.getTodoById(id)
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Todo record not found with id: " + id
@@ -51,15 +51,8 @@ public class TodoService {
     public List<TodoResponseDto.TodoData> getTodoByTitle(
             String title) {
 
-        return todoRepository.findAll()
+        return todoRepository.getTodoByTitle(title)
                 .stream()
-                .filter(todo ->
-                        todo.getTitle() != null &&
-                                todo.getTitle()
-                                        .replaceAll("\\s+", "")
-                                        .equalsIgnoreCase(
-                                                title.replaceAll("\\s+", "")
-                                        ))
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -67,85 +60,110 @@ public class TodoService {
     public TodoResponseDto.TodoData addTodo(
             TodoRequestDto requestDto) {
 
-        Todo todo = new Todo();
+        LocalDateTime createdAt = LocalDateTime.now();
 
-        todo.setTitle(requestDto.getTitle());
-        todo.setDescription(requestDto.getDescription());
-        todo.setStatus(requestDto.getStatus());
-        todo.setPriority(requestDto.getPriority());
-        todo.setDueDate(requestDto.getDueDate());
-        todo.setCreatedAt(LocalDateTime.now());
-
-        return mapToResponse(
-                todoRepository.save(todo)
+        todoRepository.addTodo(
+                requestDto.getTitle(),
+                requestDto.getDescription(),
+                requestDto.getStatus(),
+                requestDto.getPriority(),
+                requestDto.getDueDate(),
+                createdAt
         );
+
+        List<Todo> todos = todoRepository.getAllTodos();
+
+        Todo latestTodo = todos.get(todos.size() - 1);
+
+        return mapToResponse(latestTodo);
     }
 
     public TodoResponseDto.TodoData updateTodo(
             int id,
             TodoRequestDto requestDto) {
 
-        Todo todo = todoRepository.findById(id)
+        Todo existingTodo = todoRepository.getTodoById(id)
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Todo record not found with id: " + id
                         ));
 
-        todo.setTitle(requestDto.getTitle());
-        todo.setDescription(requestDto.getDescription());
-        todo.setStatus(requestDto.getStatus());
-        todo.setPriority(requestDto.getPriority());
-        todo.setDueDate(requestDto.getDueDate());
-
-        return mapToResponse(
-                todoRepository.save(todo)
+        todoRepository.updateTodo(
+                id,
+                requestDto.getTitle(),
+                requestDto.getDescription(),
+                requestDto.getStatus(),
+                requestDto.getPriority(),
+                requestDto.getDueDate()
         );
+
+        existingTodo.setTitle(requestDto.getTitle());
+        existingTodo.setDescription(requestDto.getDescription());
+        existingTodo.setStatus(requestDto.getStatus());
+        existingTodo.setPriority(requestDto.getPriority());
+        existingTodo.setDueDate(requestDto.getDueDate());
+
+        return mapToResponse(existingTodo);
     }
 
     public TodoResponseDto.TodoData patchTodo(
             int id,
             TodoRequestDto requestDto) {
 
-        Todo todo = todoRepository.findById(id)
+        Todo todo = todoRepository.getTodoById(id)
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Todo record not found with id: " + id
                         ));
 
-        if (requestDto.getTitle() != null) {
-            todo.setTitle(requestDto.getTitle());
-        }
+        String title = requestDto.getTitle() != null
+                ? requestDto.getTitle()
+                : todo.getTitle();
 
-        if (requestDto.getDescription() != null) {
-            todo.setDescription(requestDto.getDescription());
-        }
+        String description = requestDto.getDescription() != null
+                ? requestDto.getDescription()
+                : todo.getDescription();
 
-        if (requestDto.getStatus() != null) {
-            todo.setStatus(requestDto.getStatus());
-        }
+        String status = requestDto.getStatus() != null
+                ? requestDto.getStatus()
+                : todo.getStatus();
 
-        if (requestDto.getPriority() != null) {
-            todo.setPriority(requestDto.getPriority());
-        }
+        String priority = requestDto.getPriority() != null
+                ? requestDto.getPriority()
+                : todo.getPriority();
+
+        todoRepository.updateTodo(
+                id,
+                title,
+                description,
+                status,
+                priority,
+                requestDto.getDueDate() != null
+                        ? requestDto.getDueDate()
+                        : todo.getDueDate()
+        );
+
+        todo.setTitle(title);
+        todo.setDescription(description);
+        todo.setStatus(status);
+        todo.setPriority(priority);
 
         if (requestDto.getDueDate() != null) {
             todo.setDueDate(requestDto.getDueDate());
         }
 
-        return mapToResponse(
-                todoRepository.save(todo)
-        );
+        return mapToResponse(todo);
     }
 
     public Map<String, String> deleteTodo(int id) {
 
-        Todo todo = todoRepository.findById(id)
+        todoRepository.getTodoById(id)
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Todo record not found with id: " + id
                         ));
 
-        todoRepository.delete(todo);
+        todoRepository.deleteTodo(id);
 
         Map<String, String> response = new HashMap<>();
 
