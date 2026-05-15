@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +30,7 @@ public class TodoService {
                 todoRepository.getAllTodos()
                         .stream()
                         .map(this::mapToResponse)
-                        .collect(Collectors.toList());
+                        .toList();
 
         return new TodoResponseDto(
                 todoList.size(),
@@ -131,6 +132,9 @@ public class TodoService {
         String priority = requestDto.getPriority() != null
                 ? requestDto.getPriority()
                 : todo.getPriority();
+        LocalDate dueDate = requestDto.getDueDate() != null
+                ? requestDto.getDueDate()
+                : todo.getDueDate();
 
         todoRepository.updateTodo(
                 id,
@@ -138,9 +142,7 @@ public class TodoService {
                 description,
                 status,
                 priority,
-                requestDto.getDueDate() != null
-                        ? requestDto.getDueDate()
-                        : todo.getDueDate()
+                dueDate
         );
 
         todo.setTitle(title);

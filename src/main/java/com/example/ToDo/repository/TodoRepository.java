@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -52,7 +53,7 @@ public interface TodoRepository
             String description,
             String status,
             String priority,
-            String dueDate,
+            LocalDate dueDate,
             LocalDateTime createdAt
     );
 
@@ -76,7 +77,7 @@ public interface TodoRepository
             String description,
             String status,
             String priority,
-            String dueDate
+            LocalDate dueDate
     );
 
     @Transactional

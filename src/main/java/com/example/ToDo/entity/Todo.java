@@ -29,7 +29,7 @@ public class Todo {
 
     private String priority;
 
-    private String dueDate;
+    private LocalDate dueDate;
 
     private LocalDateTime createdAt;
 }

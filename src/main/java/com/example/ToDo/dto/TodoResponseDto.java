@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -31,7 +32,7 @@ public class TodoResponseDto {
 
         private String priority;
 
-        private String dueDate;
+        private LocalDate dueDate;
 
         private LocalDateTime createdAt;
     }

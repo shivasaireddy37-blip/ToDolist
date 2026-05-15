@@ -41,7 +41,7 @@ public class TodoController {
     }
 
     @GetMapping("/getToDoById/{id}")
-    public ResponseEntity<?> getTodoById(
+    public ResponseEntity<Object> getTodoById(
             @PathVariable int id) {
 
         try {
@@ -59,7 +59,7 @@ public class TodoController {
     }
 
     @GetMapping("/getToDoByTitle/{title}")
-    public ResponseEntity<?> getTodoByTitle(
+    public ResponseEntity<Object> getTodoByTitle(
             @PathVariable @NotBlank(message = "Title cannot be empty") String title) {
 
         List<TodoResponseDto.TodoData> todos = todoService.getTodoByTitle(title);
@@ -76,7 +76,7 @@ public class TodoController {
     }
 
     @PostMapping("/createToDo")
-    public ResponseEntity<?> addTodo(
+    public ResponseEntity<Object> addTodo(
             @Valid @RequestBody TodoRequestDto requestDto,
             BindingResult bindingResult) {
 
@@ -92,7 +92,7 @@ public class TodoController {
     }
 
     @PutMapping("/updateToDo/{id}")
-    public ResponseEntity<?> updateTodo(
+    public ResponseEntity<Object> updateTodo(
             @PathVariable int id,
             @Valid @RequestBody TodoRequestDto requestDto,
             BindingResult bindingResult) {
@@ -118,7 +118,7 @@ public class TodoController {
     }
 
     @DeleteMapping("/deleteToDo/{id}")
-    public ResponseEntity<?> deleteTodo(@PathVariable int id) {
+    public ResponseEntity<Object> deleteTodo(@PathVariable int id) {
 
         try {
 
@@ -134,7 +134,7 @@ public class TodoController {
     }
 
     @PatchMapping("/partialUpdateToDo/{id}")
-    public ResponseEntity<?> patchTodo(
+    public ResponseEntity<Object> patchTodo(
             @PathVariable int id,
             @RequestBody TodoRequestDto requestDto) {
 
@@ -151,7 +151,7 @@ public class TodoController {
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<?> handleTypeMismatch(
+    public ResponseEntity<Object> handleTypeMismatch(
             MethodArgumentTypeMismatchException ex) {
 
         Map<String, Object> errorResponse = new HashMap<>();
