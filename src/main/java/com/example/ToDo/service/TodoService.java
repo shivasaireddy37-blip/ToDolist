@@ -2,7 +2,7 @@ package com.example.ToDo.service;
 
 import com.example.ToDo.dto.TodoRequestDto;
 import com.example.ToDo.dto.TodoResponseDto;
-import com.example.ToDo.entity.Todo;
+import com.example.ToDo.model.Todo;
 import com.example.ToDo.mapper.TodoMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;

@@ -1,6 +1,6 @@
 package com.example.ToDo.constants;
 
-import com.example.ToDo.entity.Todo;
+import com.example.ToDo.model.Todo;
 
 import java.time.LocalDateTime;
 import java.time.LocalDate;

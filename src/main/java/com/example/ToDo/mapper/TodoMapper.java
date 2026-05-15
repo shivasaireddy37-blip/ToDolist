@@ -1,6 +1,6 @@
 package com.example.ToDo.mapper;
 
-import com.example.ToDo.entity.Todo;
+import com.example.ToDo.model.Todo;
 import org.apache.ibatis.annotations.*;
 
 import java.time.LocalDate;
