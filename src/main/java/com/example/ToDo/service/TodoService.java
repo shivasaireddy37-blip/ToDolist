@@ -3,7 +3,7 @@ package com.example.ToDo.service;
 import com.example.ToDo.dto.TodoRequestDto;
 import com.example.ToDo.dto.TodoResponseDto;
 import com.example.ToDo.entity.Todo;
-import com.example.ToDo.repository.TodoRepository;
+import com.example.ToDo.mapper.TodoMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -18,16 +18,16 @@ import java.util.stream.Collectors;
 @Service
 public class TodoService {
 
-    private final TodoRepository todoRepository;
+    private final TodoMapper todoMapper;
 
-    public TodoService(TodoRepository todoRepository) {
-        this.todoRepository = todoRepository;
+    public TodoService(TodoMapper todoMapper) {
+        this.todoMapper = todoMapper;
     }
 
     public TodoResponseDto getAllTodos() {
 
         List<TodoResponseDto.TodoData> todoList =
-                todoRepository.getAllTodos()
+                todoMapper.getAllTodos()
                         .stream()
                         .map(this::mapToResponse)
                         .toList();
@@ -40,7 +40,7 @@ public class TodoService {
 
     public TodoResponseDto.TodoData getTodoById(int id) {
 
-        Todo todo = todoRepository.getTodoById(id)
+        Todo todo = todoMapper.getTodoById(id)
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Todo record not found with id: " + id
@@ -52,7 +52,7 @@ public class TodoService {
     public List<TodoResponseDto.TodoData> getTodoByTitle(
             String title) {
 
-        return todoRepository.getTodoByTitle(title)
+        return todoMapper.getTodoByTitle(title)
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -63,7 +63,7 @@ public class TodoService {
 
         LocalDateTime createdAt = LocalDateTime.now();
 
-        todoRepository.addTodo(
+        todoMapper.addTodo(
                 requestDto.getTitle(),
                 requestDto.getDescription(),
                 requestDto.getStatus(),
@@ -72,7 +72,7 @@ public class TodoService {
                 createdAt
         );
 
-        List<Todo> todos = todoRepository.getAllTodos();
+        List<Todo> todos = todoMapper.getAllTodos();
 
         Todo latestTodo = todos.get(todos.size() - 1);
 
@@ -83,13 +83,13 @@ public class TodoService {
             int id,
             TodoRequestDto requestDto) {
 
-        Todo existingTodo = todoRepository.getTodoById(id)
+        Todo existingTodo = todoMapper.getTodoById(id)
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Todo record not found with id: " + id
                         ));
 
-        todoRepository.updateTodo(
+        todoMapper.updateTodo(
                 id,
                 requestDto.getTitle(),
                 requestDto.getDescription(),
@@ -111,7 +111,7 @@ public class TodoService {
             int id,
             TodoRequestDto requestDto) {
 
-        Todo todo = todoRepository.getTodoById(id)
+        Todo todo = todoMapper.getTodoById(id)
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Todo record not found with id: " + id
@@ -136,7 +136,7 @@ public class TodoService {
                 ? requestDto.getDueDate()
                 : todo.getDueDate();
 
-        todoRepository.updateTodo(
+        todoMapper.updateTodo(
                 id,
                 title,
                 description,
@@ -159,13 +159,13 @@ public class TodoService {
 
     public Map<String, String> deleteTodo(int id) {
 
-        todoRepository.getTodoById(id)
+        todoMapper.getTodoById(id)
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "Todo record not found with id: " + id
                         ));
 
-        todoRepository.deleteTodo(id);
+        todoMapper.deleteTodo(id);
 
         Map<String, String> response = new HashMap<>();
 
