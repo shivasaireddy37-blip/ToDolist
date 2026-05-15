@@ -1,28 +1,39 @@
 package com.example.ToDo.dto;
 
-import java.time.LocalDateTime;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class TodoResponseDto {
 
-    private int id;
+    private int totalCount;
 
-    private String title;
+    private List<TodoData> todos;
 
-    private String description;
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TodoData {
 
-    private String status;
+        private int id;
 
-    private String priority;
+        private String title;
 
-    private String dueDate;
+        private String description;
 
-    private LocalDateTime createdAt;
-    
+        private String status;
+
+        private String priority;
+
+        private LocalDate dueDate;
+
+        private LocalDateTime createdAt;
+    }
 }
