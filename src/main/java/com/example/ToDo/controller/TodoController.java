@@ -2,6 +2,7 @@ package com.example.ToDo.controller;
 
 import com.example.ToDo.dto.TodoRequestDto;
 import com.example.ToDo.dto.TodoResponseDto;
+import com.example.ToDo.model.GenericResponse;
 import com.example.ToDo.service.TodoService;
 
 import jakarta.validation.Valid;
@@ -32,67 +33,116 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 public class TodoController {
+
     private final TodoService todoService;
 
     @GetMapping("/getAllToDos")
-    public TodoResponseDto getTodos() {
+    public ResponseEntity<GenericResponse<TodoResponseDto>>
+    getTodos() {
 
-        return todoService.getAllTodos();
+        TodoResponseDto response =
+                todoService.getAllTodos();
+
+        return ResponseEntity.ok(
+                new GenericResponse<>(
+                        200,
+                        "Todos fetched successfully",
+                        response
+                )
+        );
     }
 
     @GetMapping("/getToDoById/{id}")
-    public ResponseEntity<Object> getTodoById(
-            @PathVariable int id) {
+    public ResponseEntity<GenericResponse<?>>
+    getTodoById(@PathVariable int id) {
 
         try {
 
             return ResponseEntity.ok(
-                    todoService.getTodoById(id));
+                    new GenericResponse<>(
+                            200,
+                            "Todo fetched successfully",
+                            todoService.getTodoById(id)
+                    )
+            );
 
         } catch (RuntimeException ex) {
 
             return ResponseEntity.status(404)
                     .body(
-                            todoService.getNotFoundResponse(
-                                    ex.getMessage()));
+                            new GenericResponse<>(
+                                    404,
+                                    ex.getMessage(),
+                                    null
+                            )
+                    );
         }
     }
 
     @GetMapping("/getToDoByTitle/{title}")
-    public ResponseEntity<Object> getTodoByTitle(
-            @PathVariable @NotBlank(message = "Title cannot be empty") String title) {
+    public ResponseEntity<GenericResponse<?>>
+    getTodoByTitle(
+            @PathVariable
+            @NotBlank(message = "Title cannot be empty")
+            String title) {
 
-        List<TodoResponseDto.TodoData> todos = todoService.getTodoByTitle(title);
+        var todos = todoService.getTodoByTitle(title);
 
         if (todos.isEmpty()) {
 
             return ResponseEntity.status(404)
                     .body(
-                            todoService.getNotFoundResponse(
-                                    "Todo not found with title: " + title));
+                            new GenericResponse<>(
+                                    404,
+                                    "Todo not found with title: " + title,
+                                    null
+                            )
+                    );
         }
 
-        return ResponseEntity.ok(todos);
+        return ResponseEntity.ok(
+                new GenericResponse<>(
+                        200,
+                        "Todos fetched successfully",
+                        todos
+                )
+        );
     }
 
     @PostMapping("/createToDo")
-    public ResponseEntity<Object> addTodo(
+    public ResponseEntity<GenericResponse<?>>
+    addTodo(
             @Valid @RequestBody TodoRequestDto requestDto,
             BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
 
             return ResponseEntity.badRequest()
-                    .body(todoService
-                            .getValidationErrorResponse(bindingResult));
+                    .body(
+                            new GenericResponse<>(
+                                    400,
+                                    "Validation failed",
+                                    todoService
+                                            .getValidationErrorResponse(
+                                                    bindingResult
+                                            )
+                            )
+                    );
         }
 
         return ResponseEntity.status(201)
-                .body(todoService.addTodo(requestDto));
+                .body(
+                        new GenericResponse<>(
+                                201,
+                                "Todo created successfully",
+                                todoService.addTodo(requestDto)
+                        )
+                );
     }
 
     @PutMapping("/updateToDo/{id}")
-    public ResponseEntity<Object> updateTodo(
+    public ResponseEntity<GenericResponse<?>>
+    updateTodo(
             @PathVariable int id,
             @Valid @RequestBody TodoRequestDto requestDto,
             BindingResult bindingResult) {
@@ -100,67 +150,111 @@ public class TodoController {
         if (bindingResult.hasErrors()) {
 
             return ResponseEntity.badRequest()
-                    .body(todoService
-                            .getValidationErrorResponse(bindingResult));
+                    .body(
+                            new GenericResponse<>(
+                                    400,
+                                    "Validation failed",
+                                    todoService
+                                            .getValidationErrorResponse(
+                                                    bindingResult
+                                            )
+                            )
+                    );
         }
 
         try {
 
             return ResponseEntity.ok(
-                    todoService.updateTodo(id, requestDto));
+                    new GenericResponse<>(
+                            200,
+                            "Todo updated successfully",
+                            todoService.updateTodo(id, requestDto)
+                    )
+            );
 
         } catch (RuntimeException ex) {
 
             return ResponseEntity.status(404)
-                    .body(todoService
-                            .getNotFoundResponse(ex.getMessage()));
+                    .body(
+                            new GenericResponse<>(
+                                    404,
+                                    ex.getMessage(),
+                                    null
+                            )
+                    );
         }
     }
 
     @DeleteMapping("/deleteToDo/{id}")
-    public ResponseEntity<Object> deleteTodo(@PathVariable int id) {
+    public ResponseEntity<GenericResponse<?>>
+    deleteTodo(@PathVariable int id) {
 
         try {
 
+            todoService.deleteTodo(id);
+
             return ResponseEntity.ok(
-                    todoService.deleteTodo(id));
+                    new GenericResponse<>(
+                            200,
+                            "Todo deleted successfully",
+                            null
+                    )
+            );
 
         } catch (RuntimeException ex) {
 
             return ResponseEntity.status(404)
-                    .body(todoService
-                            .getNotFoundResponse(ex.getMessage()));
+                    .body(
+                            new GenericResponse<>(
+                                    404,
+                                    ex.getMessage(),
+                                    null
+                            )
+                    );
         }
     }
 
     @PatchMapping("/partialUpdateToDo/{id}")
-    public ResponseEntity<Object> patchTodo(
+    public ResponseEntity<GenericResponse<?>>
+    patchTodo(
             @PathVariable int id,
             @RequestBody TodoRequestDto requestDto) {
 
         try {
 
             return ResponseEntity.ok(
-                    todoService.patchTodo(id, requestDto));
+                    new GenericResponse<>(
+                            200,
+                            "Todo partially updated successfully",
+                            todoService.patchTodo(id, requestDto)
+                    )
+            );
+
         } catch (RuntimeException ex) {
 
             return ResponseEntity.status(404)
-                    .body(todoService
-                            .getNotFoundResponse(ex.getMessage()));
+                    .body(
+                            new GenericResponse<>(
+                                    404,
+                                    ex.getMessage(),
+                                    null
+                            )
+                    );
         }
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<Object> handleTypeMismatch(
+    public ResponseEntity<GenericResponse<?>>
+    handleTypeMismatch(
             MethodArgumentTypeMismatchException ex) {
 
-        Map<String, Object> errorResponse = new HashMap<>();
-
-        errorResponse.put("status", 400);
-        errorResponse.put("message", "Invalid ID. Please provide a numeric value.");
-
         return ResponseEntity.badRequest()
-                .body(errorResponse);
+                .body(
+                        new GenericResponse<>(
+                                400,
+                                "Invalid ID. Please provide a numeric value.",
+                                null
+                        )
+                );
     }
-
 }
